@@ -1,0 +1,51 @@
+import 'package:flutter/material.dart';
+import 'package:svg_path_parser/svg_path_parser.dart';
+import 'package:touchable/touchable.dart';
+
+import '../data/models/muscle_draw_model.dart';
+
+class PathPainter extends CustomPainter {
+
+  final BuildContext context;
+  final bool front;
+  List<MuscleDraw> muscleList;
+  int currentIndex ;
+  int flix ;
+
+  PathPainter(this.context, this.front,this.muscleList,this.currentIndex, Size size, this.flix);
+  @override
+  void paint(Canvas canvas, Size size) {
+
+    var myCanvas = TouchyCanvas(context, canvas);
+
+    Paint paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 8.0;
+
+    // Scale each path to match canvas size
+    var xScale = size.width / (flix+size.width*.5);
+    var yScale = size.height / (flix+size.height*.5);
+    final Matrix4 matrix4 = Matrix4.identity();
+
+    matrix4.scale(xScale, yScale);
+
+    muscleList.forEach((muscle) {
+      Path path = parseSvgPath(muscle.path) ;
+      print(path.toString());
+      paint.color = Colors.blueGrey;
+      if(muscle.index!=currentIndex)
+        paint.color = Colors.orange;
+
+      path.transform(matrix4.storage);
+
+      myCanvas.drawPath(
+        path.transform(matrix4.storage),
+        paint,
+      );
+    });
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+}
+
